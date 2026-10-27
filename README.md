@@ -4,16 +4,23 @@ Ventana pequeña para la segunda pantalla con el rango, el MMR y la racha de los
 
 ## Instalarlo
 
-1. Instala [Python 3](https://www.python.org/downloads/) (3.11 o más nuevo) y marca **«Add python.exe to PATH»** en el instalador.
-2. Descarga la última versión desde [Releases](https://github.com/mafiaki/climb-tracker/releases/latest) (**Source code (zip)**) y descomprímela donde quieras.
-3. **La primera vez:** doble clic en `Iniciar Climb Tracker.bat`. Instala lo necesario (`pywebview` y `curl_cffi`) y abre la app.
-4. **Las siguientes veces:** doble clic en `Climb Tracker.pyw` o en el `.bat`, da igual.
+No hay que instalar nada:
 
-La carpeta es portable: puedes moverla o copiarla adonde quieras. Tu lista de jugadores y tus ajustes se guardan en `data/`, que es solo tuya.
+1. Descarga **`Climb-Tracker-vX.Y.Z-windows.zip`** de la [última versión](https://github.com/mafiaki/climb-tracker/releases/latest).
+2. Descomprímelo donde quieras (Escritorio, Documentos, un USB…).
+3. Abre **`Climb Tracker.exe`**.
+
+La primera vez Windows puede avisar con «Windows protegió tu PC» porque el programa no está firmado: pulsa **Más información → Ejecutar de todas formas**. Funciona en Windows 10 y 11 (usa WebView2, que ya viene con Windows).
+
+La carpeta es portable: puedes moverla o copiarla adonde quieras. Tu lista de jugadores y tus ajustes se guardan en su carpeta `data/`, que es solo tuya.
 
 ## Actualizaciones
 
 Al abrirse, la app mira si hay una versión nueva en GitHub y, si la hay, avisa abajo con un botón **Actualizar**: baja la versión nueva, la pone encima sin tocar `data/` (tus jugadores y ajustes siguen igual) y se vuelve a abrir sola. También puedes buscarla a mano en **Ajustes → Versión → Buscar actualizaciones**.
+
+## Desde el código (opcional)
+
+Si prefieres usarla con tu Python (3.11 o más nuevo): descarga el código, abre `Iniciar Climb Tracker.bat` la primera vez (instala `pywebview` y `curl_cffi`) y luego `Climb Tracker.pyw`. Para crear la versión portable: `pip install pyinstaller` y `python tools/build.py`. El icono se genera con `python tools/make_icon.py`.
 
 ## Qué muestra
 

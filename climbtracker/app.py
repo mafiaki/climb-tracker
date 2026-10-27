@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
 import time
 import webbrowser
@@ -16,10 +17,12 @@ import webview
 
 from . import statsapi, tracker, updater
 
-# Todo relativo a la carpeta del programa, para que sea portable.
-APP_DIR = Path(__file__).resolve().parent.parent
+# Todo relativo a la carpeta del programa (la del .exe si va empaquetado), para que sea portable.
+APP_DIR = updater.APP_DIR
 DATA_DIR = APP_DIR / "data"
-UI_INDEX = Path(__file__).resolve().parent / "ui" / "index.html"
+PKG_DIR = Path(__file__).resolve().parent  # en el .exe, la copia que va dentro de _internal
+UI_INDEX = PKG_DIR / "ui" / "index.html"
+ICON = PKG_DIR / "assets" / "icon.ico"
 
 DEFAULT_CONFIG = {
     "players": [],
@@ -145,12 +148,18 @@ class Backend:
             info = updater.check()
             if not info["available"]:
                 return {"ok": False, "error": "Ya tienes la última versión"}
-            if updater.install(APP_DIR, info["zip"]):
+            if updater.FROZEN:
+                # .exe: la versión nueva se baja aparte y se copia encima al cerrar esta.
+                new_exe = updater.stage(info)
+            elif updater.install(APP_DIR, info["zip"]):
                 updater.install_requirements(APP_DIR)
         except Exception as e:
             return {"ok": False, "error": f"No se pudo actualizar: {e}"}
         self._on_closing()  # guarda ajustes y ventana antes de reiniciar
-        updater.restart(APP_DIR)
+        if updater.FROZEN:
+            updater.launch_apply(new_exe)
+        else:
+            updater.restart(APP_DIR)
         threading.Timer(0.8, self._window.destroy).start()
         return {"ok": True}
 
@@ -788,4 +797,5 @@ def main() -> None:
     threading.Thread(target=backend._worker, daemon=True).start()
     threading.Thread(target=backend._live_worker, daemon=True).start()
     threading.Thread(target=backend._live_lookups, daemon=True).start()
-    webview.start(private_mode=True)
+    threading.Thread(target=updater.cleanup_staging, daemon=True).start()
+    webview.start(private_mode=True, icon=str(ICON) if ICON.exists() else None)

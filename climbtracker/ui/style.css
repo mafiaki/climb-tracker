@@ -312,3 +312,6 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 .toast.update { z-index: 21; }
 .toast.update span { flex: 1; }
 .toast.update .primary { padding: 4px 10px; }
+
+/* ---------- icono en la cabecera ---------- */
+.brand img { width: 16px; height: 16px; margin-right: 6px; }
