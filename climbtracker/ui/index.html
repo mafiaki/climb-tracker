@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climb Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand"><span class="dot blue"></span><span class="dot orange"></span>Climb Tracker</div>
+    <div class="actions">
+      <button id="btn-session" class="icon" title="Nueva sesión">
+        <svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2.5 4.5L17 13H5"/></svg>
+      </button>
+      <button id="btn-refresh" class="icon" title="Actualizar ahora">
+        <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+      </button>
+      <button id="btn-pin" class="icon" title="Mantener encima de otras ventanas">
+        <svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 4H6l4-4zM12 14v7"/></svg>
+      </button>
+      <button id="btn-settings" class="icon" title="Ajustes">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+      <button id="btn-add" class="icon accent" title="Añadir jugador">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav id="tabs" class="tabs"></nav>
+</header>
+
+<main>
+  <div id="list" class="list"></div>
+  <section id="live" class="live" hidden></section>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+<div id="update" class="toast update" hidden></div>
+
+<div id="modal" class="modal" hidden>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<template id="tpl-add">
+  <h2>Añadir jugador</h2>
+  <div class="seg" id="add-platforms"></div>
+  <form id="add-form">
+    <input id="add-query" autocomplete="off" spellcheck="false" placeholder="Nombre, ID o enlace del perfil">
+    <p class="hint" id="add-hint"></p>
+    <p class="error" id="add-error"></p>
+    <div class="buttons">
+      <button type="button" class="ghost" data-close>Cancelar</button>
+      <button type="submit" class="primary" id="add-submit">Añadir</button>
+    </div>
+  </form>
+</template>
+
+<template id="tpl-settings">
+  <h2>Ajustes</h2>
+  <label class="field">Buscar cambios cada
+    <div class="seg" id="set-refresh"></div>
+  </label>
+  <p class="hint">Tracker solo refresca cada perfil cada ~6 min, consultar más seguido no trae datos nuevos.</p>
+  <label class="field">MMR ganado o perdido
+    <div class="seg" id="set-results"></div>
+  </label>
+  <p class="hint">«Sesión» cuenta desde que pulsas el botón de la bandera, arriba. Útil si juegas un rato solo y luego con amigos.</p>
+  <label class="toggle"><input type="checkbox" id="set-compact"> Vista compacta (solo rango y MMR)</label>
+  <label class="toggle"><input type="checkbox" id="set-ontop"> Siempre encima de otras ventanas</label>
+  <h3>Partida en curso (Stats API del juego)</h3>
+  <p class="hint">Con la Stats API activada, al acabar cada partida se actualiza enseguida el MMR de los de tu lista que jugaban en ella.</p>
+  <label class="toggle"><input type="checkbox" id="set-live"> Mostrar debajo a los jugadores de la partida</label>
+  <label class="field" style="margin-top:10px">Rango que se ve de cada jugador
+    <div class="seg" id="set-match-rank"></div>
+  </label>
+  <div id="live-setup"></div>
+  <h3>Versión</h3>
+  <p class="hint">Climb Tracker <b id="set-version"></b></p>
+  <div class="row-btns">
+    <button type="button" class="link" id="set-check">Buscar actualizaciones</button>
+    <button type="button" class="link" id="set-github">GitHub ↗</button>
+  </div>
+  <p class="hint" id="set-update"></p>
+  <p class="hint sep">Rangos de rocketleague.tracker.network (API no oficial). La partida se lee de la Stats API oficial del juego, sin tocar su proceso.</p>
+  <div class="buttons"><button type="button" class="primary" data-close>Listo</button></div>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>

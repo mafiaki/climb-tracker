@@ -1,0 +1,2 @@
+# El lanzador de Windows necesita finales de línea CRLF tal cual.
+*.bat -text

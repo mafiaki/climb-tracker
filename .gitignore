@@ -1,0 +1,6 @@
+# Datos de cada usuario: sus jugadores, ajustes y caché. Nunca se suben.
+data/
+
+__pycache__/
+*.pyc
+*.new
