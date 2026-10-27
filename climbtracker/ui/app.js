@@ -410,7 +410,12 @@ function teamHTML(players, team, pid) {
 function renderLive() {
   const el = $("#live");
   const lv = S.live || {};
-  const m = S.config.show_match && lv.match;
+  const pos = S.config.match_pos || "off";
+  const m = pos !== "off" && lv.match;
+  // La sección va encima o debajo de la lista según Ajustes → Mostrar partida.
+  if (pos === "top" ? el.nextElementSibling !== list : el.previousElementSibling !== list) {
+    if (pos === "top") list.before(el); else list.after(el);
+  }
   const parts = [];
   if (lv.ini_reset) {
     parts.push(`<div class="notice">Una actualización del juego apagó la Stats API.
@@ -702,8 +707,8 @@ function openSettings() {
     S.config.match_rank || "tab", v => setOption("match_rank", v));
   setupVersion();
   const live = $("#set-live");
-  live.checked = !!S.config.show_match;
-  live.addEventListener("change", () => setOption("show_match", live.checked));
+  segmented(live, [["top", "Arriba"], ["bottom", "Abajo"], ["off", "No"]].map(([value, label]) => ({ value, label })),
+    S.config.match_pos || "off", v => setOption("match_pos", v));
   $("#live-setup").addEventListener("click", async e => {
     const b = e.target.closest("[data-setup]");
     if (!b || b.disabled) return;

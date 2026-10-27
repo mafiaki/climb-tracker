@@ -29,7 +29,7 @@ import zipfile
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 REPO = "mafiaki/climb-tracker"
 REPO_URL = f"https://github.com/{REPO}"
 EXE_NAME = "Climb Tracker.exe"

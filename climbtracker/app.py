@@ -30,7 +30,7 @@ DEFAULT_CONFIG = {
     "refresh_minutes": 2,
     "on_top": False,
     "compact": False,
-    "show_match": False,  # sección "En partida" debajo de la lista (Stats API del juego)
+    "match_pos": "off",  # sección de la partida (Stats API del juego): "top", "bottom" u "off"
     "session_start": None,  # cuándo empezó la sesión actual (botón "Nueva sesión")
     "result_mode": "both",  # MMR ganado/perdido: "day", "session" o "both"
     "match_rank": "tab",  # rango en "En partida": de la pestaña elegida ("tab") o de la lista jugada ("match")
@@ -39,6 +39,7 @@ DEFAULT_CONFIG = {
     "window": {"width": 340, "height": 600, "x": None, "y": None},
 }
 THRESHOLDS_MAX_AGE = 24 * 3600
+MATCH_POSITIONS = ("top", "bottom", "off")
 LIVE_RETRY = 5  # segundos entre intentos de conectar con el juego
 LIVE_TTL = 5 * 60  # no volver a pedir a Tracker un rival visto hace menos de esto
 # Al acabar una partida: primer refresco a los 15 s (o al caducar la caché de
@@ -85,7 +86,12 @@ class Backend:
         self._client = tracker.TrackerClient()
         self._window = None
         self._ready = False
-        self._config = {**DEFAULT_CONFIG, **_load_json(DATA_DIR / "config.json", {})}
+        saved = _load_json(DATA_DIR / "config.json", {})
+        if "show_match" in saved and "match_pos" not in saved:
+            # Antes era una casilla ("mostrar debajo"): activada pasa a "abajo".
+            saved["match_pos"] = "bottom" if saved["show_match"] else "off"
+        saved.pop("show_match", None)
+        self._config = {**DEFAULT_CONFIG, **saved}
         if not self._config.get("session_start"):
             # Primera vez: la sesión empieza al abrir la app; luego solo con el botón.
             self._config["session_start"] = datetime.now().astimezone().isoformat()
@@ -211,7 +217,9 @@ class Backend:
             self._save()
 
     def set_option(self, name: str, value) -> None:
-        if name not in ("playlist", "refresh_minutes", "on_top", "compact", "show_match",
+        if name == "match_pos" and value not in MATCH_POSITIONS:
+            return
+        if name not in ("playlist", "refresh_minutes", "on_top", "compact", "match_pos",
                         "session_start", "result_mode", "match_rank"):
             return
         with self._lock:
@@ -221,7 +229,7 @@ class Backend:
             self._window.on_top = bool(value)
         if name == "refresh_minutes":
             self._reschedule()
-        if name == "show_match":
+        if name == "match_pos":
             self._live_wake.set()  # buscar ya a los de la partida en curso
             self._push_live()
 
@@ -333,6 +341,9 @@ class Backend:
         info = self.check_update()
         if info.get("available"):
             self._push({"type": "update", "update": info})
+
+    def _show_match(self) -> bool:
+        return self._config.get("match_pos", "off") != "off"
 
     def _view(self, player: dict) -> dict:
         key = _key(player["platform"], player["id"])
@@ -525,7 +536,7 @@ class Backend:
 
     def _live_state(self) -> dict:
         m = self._match
-        show = m and not m["hidden"] and self._config.get("show_match")
+        show = m and not m["hidden"] and self._show_match()
         return {
             "status": self._live_status,
             "ini_reset": self._ini_reset,
@@ -721,7 +732,7 @@ class Backend:
                 with self._lock:
                     m = self._match
                     now = time.time()
-                    show = m and not m["ended"] and not m["hidden"] and self._config.get("show_match")
+                    show = m and not m["ended"] and not m["hidden"] and self._show_match()
                     lp = next((p for p in m["players"] if self._live_due(p, now)), None) if show else None
                 if not lp:
                     break
