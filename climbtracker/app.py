@@ -195,6 +195,7 @@ class Backend:
             self._next[key] = 0  # que el hilo traiga ya sus partidas
             self._save()
         self._wake.set()
+        self._push_live()  # si está en la partida, su tarjeta pasa a ✓
         return {"ok": True, "player": self._view(player)}
 
     def remove_player(self, key: str) -> None:
@@ -205,6 +206,7 @@ class Backend:
             self._cache.pop(key, None)
             self._post.pop(key, None)
             self._save()
+        self._push_live()  # que en la partida vuelva a salir el + para añadirlo
 
     def move_player(self, key: str, delta: int) -> None:
         with self._lock:
@@ -333,6 +335,16 @@ class Backend:
         for p in list(self._config["players"]):
             if _key(p["platform"], p["id"]) == key:
                 webbrowser.open(tracker.profile_url(p["platform"], p["id"]))
+
+    def open_live_profile(self, key: str) -> None:
+        """Abre en Tracker el perfil de alguien de la partida."""
+        with self._lock:
+            lp = next((p for p in (self._match or {}).get("players", []) if p["key"] == key), None)
+            prof = (self._live_info.get(key) or {}).get("profile")
+        if prof:
+            webbrowser.open(tracker.profile_url(prof["platform"], prof["id"]))
+        elif lp and lp["kind"] == "player":
+            webbrowser.open(tracker.profile_url(lp["platform"], lp["ident"]))
 
     # ---------- interno ----------
 

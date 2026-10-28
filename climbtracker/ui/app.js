@@ -390,10 +390,13 @@ function detailsHTML(p, pl) {
 
 const PLUS = `<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
 
+const EXTERNAL = `<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>`;
+
 function liveAction(p) {
   if (p.kind !== "player") return "";
-  if (p.tracked) return `<span class="tracked" title="Ya está en tu lista">✓</span>`;
-  return `<button class="icon add" data-live="add" title="Añadir a mi lista">${PLUS}</button>`;
+  const web = `<button class="icon web" data-live="web" title="Ver su perfil en Tracker">${EXTERNAL}</button>`;
+  if (p.tracked) return `${web}<span class="tracked" title="Ya está en tu lista">✓</span>`;
+  return `${web}<button class="icon add" data-live="add" title="Añadir a mi lista">${PLUS}</button>`;
 }
 
 function teamHTML(players, team, pid) {
@@ -458,6 +461,7 @@ $("#live").addEventListener("click", async e => {
   const a = b.dataset.live;
   if (a === "fold") { S.liveOpen = !S.liveOpen; renderLive(); }
   if (a === "dismiss") api().dismiss_live();
+  if (a === "web") api().open_live_profile(b.closest(".card").dataset.key);
   if (a === "forget") api().dismiss_ini_reset();
   if (a === "enable") {
     const st = await api().enable_stats_api();

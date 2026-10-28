@@ -153,10 +153,13 @@ body.compact .mmr b { font-size: 18px; }
 .card.mini .stats, .card.mini .bar { display: none; }
 .card.mini .rank { width: 30px; height: 30px; }
 .card.mini .mmr b { font-size: 18px; }
+.card.mini .mmr { min-width: 48px; }  /* así los botones quedan alineados entre tarjetas */
 .card.mini .mmr .cup { display: inline; }
 .card.mini .mmr .lbl:has(+ .cup) { display: none; }
 .icon.add { width: 24px; height: 24px; flex: none; color: var(--blue); }
 .icon.add:disabled { opacity: .4; cursor: default; }
+.icon.web { width: 24px; height: 24px; flex: none; }
+.icon.web svg { width: 14px; height: 14px; }
 .tracked { width: 24px; flex: none; text-align: center; color: var(--win); font-size: 13px; font-weight: 700; }
 
 /* ---------- detalle ---------- */
